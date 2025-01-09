@@ -57,3 +57,4 @@ $route['translate_uri_dashes'] = FALSE;
 
 $route['requisitos'] = 'RequisitosController/obtener_requisitos';
 $route['login'] = 'LoginController/login';
+$route['protected'] = 'LoginController/protected';

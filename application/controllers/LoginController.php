@@ -67,31 +67,42 @@ class LoginController extends CI_Controller {
     }
 
     public function protected() {
-        // Recuperar el token desde la cookie
-        $access_token = $_COOKIE['access_token'] ?? null;
+        // Configurar la carga de la base de datos y librerías necesarias
+        $this->load->database('usuarios'); // Configura correctamente la conexión
+        
+           // Recuperar el token desde la cookie
+    $access_token = $_COOKIE['access_token'] ?? null;
 
-        if (!$access_token) {
-            $this->output
-                ->set_content_type('application/json')
-                ->set_output(json_encode(["error" => "Acceso no autorizado"], JSON_UNESCAPED_UNICODE))
-                ->set_status_header(401);
-            return;
-        }
+    if (!$access_token) {
+        // Si no hay cookie, devolver error
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(["error" => "Acceso no autorizado"], JSON_UNESCAPED_UNICODE))
+            ->set_status_header(401);
+        return;
+    }
 
-        try {
-            // Decodificar el token JWT
-            $decoded_token = $this->jwt->decode($access_token, 'SECRETO_COMPARTIDO', ['HS256']);
+    // Verificar si el access_token existe en la base de datos
+    $query = $this->db->query("SELECT id, email FROM usuarios WHERE uuid = ?", [$access_token]);
 
-            $this->output
-                ->set_content_type('application/json')
-                ->set_output(json_encode([
-                    "message" => "Bienvenido, usuario " . $decoded_token->email
-                ], JSON_UNESCAPED_UNICODE));
-        } catch (Exception $e) {
-            $this->output
-                ->set_content_type('application/json')
-                ->set_output(json_encode(["error" => "Token inválido"], JSON_UNESCAPED_UNICODE))
-                ->set_status_header(401);
-        }
+    if ($query->num_rows() === 0) {
+        // Si no se encuentra el UUID en la base de datos
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(["error" => "Token inválido o no autorizado"], JSON_UNESCAPED_UNICODE))
+            ->set_status_header(401);
+        return;
+    }
+
+    // Si se encuentra, recuperar los datos del usuario
+    $usuario = $query->row();
+
+    // Enviar respuesta exitosa con los datos del usuario
+    $this->output
+        ->set_content_type('application/json')
+        ->set_output(json_encode([
+            "message" => "Bienvenido, usuario " . $usuario->email,
+            "id" => $usuario->id
+        ], JSON_UNESCAPED_UNICODE));
     }
 }
