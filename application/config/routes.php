@@ -56,3 +56,4 @@ $route['translate_uri_dashes'] = FALSE;
 // Agregar una regla para que cualquier otra ruta pase al controlador Frontend
 
 $route['requisitos'] = 'RequisitosController/obtener_requisitos';
+$route['login'] = 'LoginController/login';
