@@ -1,16 +1,6 @@
 <?php
 error_reporting(0);
 
-function enable_cors() {
-    header("Access-Control-Allow-Origin:*"); // Cambia a tu dominio frontend
-    header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
-    header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
-
-    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-        exit(0); // Responder a las solicitudes preflight
-    }
-}
-
 class RequisitosController extends CI_Controller {
     public function __construct() {
         parent::__construct();
@@ -20,6 +10,14 @@ class RequisitosController extends CI_Controller {
 
     //Lista todos los requisitos que hay en la base de datos
     public function obtener_requisitos() {
+
+        $user_session = $this->input->cookie('access_token', TRUE); // Suponiendo que la cookie es 'user_session'
+
+        if (!$user_session) {
+            // Si la cookie no existe o no es válida, redirigir al login
+            exit();
+        }
+
         $requisitos = $this->Requisitos_Read->obtener_requisitos();
 
     // Decodificar entidades HTML
@@ -34,6 +32,14 @@ class RequisitosController extends CI_Controller {
 
     //Lista los detalles de los requisitos que estan en la base de datos
     public function detalle($id) {
+
+        $user_session = $this->input->cookie('access_token', TRUE); // Suponiendo que la cookie es 'user_session'
+
+        if (!$user_session) {
+            // Si la cookie no existe o no es válida, redirigir al login
+            exit();
+        }
+
         $this->load->model('Requisitos_Detalle'); // Carga el modelo
 
         $resultado = $this->Requisitos_Detalle->obtener_requisito_y_seccion($id);
@@ -46,4 +52,39 @@ class RequisitosController extends CI_Controller {
             echo json_encode(['error' => 'Requisito o sección no encontrados']);
         }
     }
+
+
+    public function actualizar($id) {
+
+        $this->load->model('Requisitos_Update'); // Carga el modelo
+         
+        // Obtén los datos de la solicitud POST
+        $inputData = file_get_contents('php://input');
+        $datos = json_decode($inputData, true); // Decodifica el JSON en un array asociativo
+        
+        if (!$datos) {
+            show_error('Datos inválidos', 400);
+        }
+
+         // Eliminar el campo 'id' si existe en los datos
+         unset($datos['id']); // Esto evita que el campo 'id' sea enviado al modelo
+    
+        // Actualiza los datos
+        $resultado = $this->Requisitos_Update->actualizar_requisito($id, $datos);
+    
+        if ($resultado) {
+            $response = ['mensaje' => 'Requisito actualizado exitosamente.'];
+            $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode($response));
+        } else {
+            $response = ['mensaje' => 'Error al actualizar el requisito.'];
+            $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(500)
+                ->set_output(json_encode($response));
+        }
+    }
+    
 }
