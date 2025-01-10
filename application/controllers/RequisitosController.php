@@ -67,7 +67,7 @@ class RequisitosController extends CI_Controller {
         }
 
          // Eliminar el campo 'id' si existe en los datos
-         unset($datos['id']); // Esto evita que el campo 'id' sea enviado al modelo
+         unset($datos['cat_id']); // Esto evita que el campo 'id' sea enviado al modelo
     
         // Actualiza los datos
         $resultado = $this->Requisitos_Update->actualizar_requisito($id, $datos);
@@ -87,4 +87,37 @@ class RequisitosController extends CI_Controller {
         }
     }
     
+
+    public function actualizar_secciones($id) {
+
+        $this->load->model('Seccion_Update'); // Carga el modelo
+         
+        // Obtén los datos de la solicitud POST
+        $inputData = file_get_contents('php://input');
+        $datos = json_decode($inputData, true); // Decodifica el JSON en un array asociativo
+        
+        if (!$datos) {
+            show_error('Datos inválidos', 400);
+        }
+
+         // Eliminar el campo 'id' si existe en los datos
+         unset($datos['id']); // Esto evita que el campo 'id' sea enviado al modelo
+    
+        // Actualiza los datos
+        $resultado = $this->Seccion_Update->actualizar_seccion($id, $datos);
+    
+        if ($resultado) {
+            $response = ['mensaje' => 'Requisito actualizado exitosamente.'];
+            $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode($response));
+        } else {
+            $response = ['mensaje' => 'Error al actualizar el requisito.'];
+            $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(500)
+                ->set_output(json_encode($response));
+        }
+    }
 }
