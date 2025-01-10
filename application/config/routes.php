@@ -59,6 +59,7 @@ $route['requisitos'] = 'RequisitosController/obtener_requisitos';
 $route['requisitos/(:num)'] = 'RequisitosController/detalle/$1';
 $route['requisitos-actualizar/(:num)'] = 'RequisitosController/actualizar/$1';
 $route['secciones-actualizar/(:num)'] = 'RequisitosController/actualizar_secciones/$1';
+$route['requisitos-nuevo'] = 'RequisitosController/nuevo_requisito';
 
 $route['login'] = 'LoginController/login';
 $route['protected'] = 'LoginController/protected';

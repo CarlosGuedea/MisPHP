@@ -120,4 +120,77 @@ class RequisitosController extends CI_Controller {
                 ->set_output(json_encode($response));
         }
     }
+
+
+    public function nuevo_requisito(){
+        $this->load->model('Requisitos_Nuevo'); // Carga el modelo
+
+        // Verifica si es una solicitud POST
+        if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+            show_error('Método no permitido', 405);
+        }
+
+        // Decodifica el JSON enviado desde el frontend
+        $data = json_decode($this->input->raw_input_stream, true);
+
+        if (!$data) {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode(['error' => 'Datos no válidos']));
+            return;
+        }
+
+        // Divide los datos en los correspondientes a requisito y sección
+        $requisito = [
+            'id_area'         => $data['requisito']['id_area'] ?? null,
+            'valor'           => $data['requisito']['valor'] ?? null,
+            'etiqueta'        => $data['requisito']['etiqueta'] ?? null,
+            'codigo'          => $data['requisito']['codigo'] ?? null,
+            'descripcion'     => $data['requisito']['descripcion'] ?? null,
+            'id_tarifa'       => $data['requisito']['id_tarifa'] ?? null,
+            'activo'          => 1,
+            'estatus'         => 1,
+            'usuario_creado'  => 1,
+        ];
+
+        $seccion = [
+            'tipo'            => $data['seccion']['tipo'] ?? null,
+            'valor'           => $data['seccion']['valor'] ?? null,
+            'descripcion'     => $data['seccion']['descripcion'] ?? null,
+            'fila'            => $data['seccion']['fila'] ?? null,
+            'activo'          => 1,
+            'estatus'         => 1,
+            'usuario_creado'  => 1,
+        ];
+
+        // Valida los datos requeridos
+        // if (!$requisito['valor'] || !$requisito['etiqueta'] || !$seccion['valor']) {
+        //     $this->output
+        //         ->set_content_type('application/json')
+        //         ->set_status_header(400)
+        //         ->set_output(json_encode(['error' => 'Faltan campos obligatorios']));
+        //     return;
+        // }
+
+        // Llama al modelo para insertar el requisito y la sección
+        $uuid = $this->Requisitos_Nuevo->nuevo_requisito($requisito, $seccion);
+
+        if ($uuid) {
+            // Respuesta de éxito
+            $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(201)
+                ->set_output(json_encode([
+                    'message' => 'Requisito y sección creados exitosamente',
+                    'uuid' => $uuid
+                ]));
+        } else {
+            // Respuesta de error
+            $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(500)
+                ->set_output(json_encode(['error' => 'Error al crear el requisito y la sección']));
+        }
+    }
 }
