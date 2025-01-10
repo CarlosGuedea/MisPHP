@@ -164,14 +164,6 @@ class RequisitosController extends CI_Controller {
             'usuario_creado'  => 1,
         ];
 
-        // Valida los datos requeridos
-        // if (!$requisito['valor'] || !$requisito['etiqueta'] || !$seccion['valor']) {
-        //     $this->output
-        //         ->set_content_type('application/json')
-        //         ->set_status_header(400)
-        //         ->set_output(json_encode(['error' => 'Faltan campos obligatorios']));
-        //     return;
-        // }
 
         // Llama al modelo para insertar el requisito y la sección
         $uuid = $this->Requisitos_Nuevo->nuevo_requisito($requisito, $seccion);
@@ -192,5 +184,28 @@ class RequisitosController extends CI_Controller {
                 ->set_status_header(500)
                 ->set_output(json_encode(['error' => 'Error al crear el requisito y la sección']));
         }
+    }
+
+    public function eliminar($id) {
+        $this->load->model('Requisitos_Delete'); // Carga el modelo
+        // Verifica si es una solicitud DELETE
+        
+            // Llama al modelo para eliminar el requisito
+            $resultado = $this->Requisitos_Delete->eliminar_requisito($id);
+
+            if ($resultado) {
+                // Respuesta de éxito
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(200)
+                    ->set_output(json_encode(['message' => 'Requisito eliminado exitosamente']));
+            } else {
+                // Respuesta de error
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(500)
+                    ->set_output(json_encode(['error' => 'Error al eliminar el requisito']));
+            }
+       
     }
 }
